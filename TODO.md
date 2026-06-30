@@ -1,0 +1,39 @@
+# TODO
+
+Candidate starting tasks, ordered by dependency (each later task needs the earlier ones). See the
+referenced docs for the governing spec.
+
+- [x] **1. Snapshot references** — copy the prior-experiment files and master checklist into
+  `references/` so the project is self-contained and reproducible.
+  → `docs/references.md`
+
+- [x] **2. Build `item-universe.md`** — classify each checklist item as
+  `injectable: yes | no | partial` with a one-line note. Only `injectable: yes` items are eligible
+  for Phase-1 groups. (Phase-1 §0 prerequisite — bounds the item universe.)
+  → `docs/phase-1-design.md` §0
+
+- [~] **3. Pick OSS repo + build commit bank** — choose a permissive, idiomatic OSS codebase, pin
+  `BASE_SHA`, and start the labeled commit bank using the trailer grammar
+  (`Kind` / `Area` / `Issue-Items`). Mirror to `bank.jsonl`.
+  → `docs/corpus-spec.md`
+  - [x] Repo selected: **cal.com** @ `92f44dce` (pure TS/TSX) + corpus scaffold (`corpus/`:
+    `BASE_SHA`, `SOURCE.md`, `areas.md`, `density-calibration.md`, `bank.jsonl` placeholder).
+  - [x] Phase-1 group selection: **`groups.md`** — 3 cohesive (C1–C3) + 3 incoherent (D1–D3),
+    15 distinct `yes` items, all plantable in cal.com non-`ee/`. (Unblocks the commit bank.)
+  - [x] Corpus repo seeded: `corpus/repo` = fresh git repo with cal.com@BASE_SHA tree as the base
+    commit (source clone had pack corruption; seeded via `git archive`, host files verified identical).
+  - [~] Build the labeled commit bank — plant the 15 items from `groups.md` as `Kind: issue` commits
+    + decoys/clean padding; mirror to `bank.jsonl`.
+    - [x] **C1 data-flow (area `daily-webhook`)**: 4 issue commits on `issue/*` branches, all
+      independently cherry-pickable (compose-tested, no conflicts), recorded in `bank.jsonl`:
+      18.6.4 (+17.6.2), 16.7.7, 17.4.4a, 17.6.2 (+17.6.3).
+    - [ ] C1 decoys / near-misses (valid `||` fallback, logging catch, validated branch) + clean padding.
+    - [ ] C2 structural + C3 bloat issue commits (areas `packages/lib/server`, app-store/emails).
+    - [ ] D-group JS-footgun items (17.6.4, 17.6.6, 17.6.7).
+  - [ ] Run density calibration from cal.com CRB cases (`corpus/density-calibration.md`) — sizes the
+    clean/decoy padding for case composition.
+
+- [ ] **4. Build the harness** — case-builder (cherry-pick + `git diff`), the solo-vs-in-group run
+  matrix (N≥3, temp 0, frozen preamble), and the LLM-judge semantic scorer that computes
+  reinforcement lift.
+  → `docs/methodology.md`, `docs/phase-1-design.md` §3

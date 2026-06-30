@@ -1,0 +1,13 @@
+# Nested cal.com corpus checkout — its own git repo, reproduced via SOURCE.md,
+# not tracked by this project. (See corpus/SOURCE.md for how to rebuild it.)
+corpus/repo/
+
+# Python
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+
+# Editor / OS
+.DS_Store
+*.swp
