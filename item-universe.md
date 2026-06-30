@@ -232,24 +232,27 @@ injection with multi-tag ground truth ([`methodology.md`](docs/methodology.md) �
 
 ### 17.6 Scripting & Dynamic Languages
 
-| ID      | Item                                                  | injectable | note                                                                                |
-| ------- | ----------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------- |
-| 17.6.1  | Use gradual typing                                    | partial    | Add untyped/any code in a typed project, one commit; needs typed host.              |
-| 17.6.2  | Runtime schema validation                             | yes        | Consume external data without validation in one commit. ≈ 18.6.4. Data-flow.        |
-| 17.6.3  | Type narrowing                                        | yes        | Operate on an uncertain type without a runtime check, one commit.                   |
-| 17.6.4  | Strict equality (JS)                                  | yes        | §0 exemplar. Use ==/!= in one commit. JS-footgun anchor.                            |
-| 17.6.5  | Mutable default arguments (Python)                    | yes        | Add def f(x=[]) in one commit. JS-footgun analogue (Py).                            |
-| 17.6.6  | this context loss (JS)                                | yes        | §0 exemplar. Pass an unbound method losing this, one commit. JS-footgun anchor.     |
-| 17.6.7  | var hoisting (JS)                                     | yes        | Use var with a hoisting bug in one commit.                                          |
-| 17.6.8  | Prototype pollution (JS)                              | yes        | Merge untrusted input into a prototype, one commit. Data-flow + security.           |
-| 17.6.9  | Global scope pollution (JS)                           | yes        | Add a non-strict global leak in one commit.                                         |
-| 17.6.10 | Explicit over implicit (no request context in models) | yes        | Have a model/service call auth()/session() directly, one commit. ≈ 16.7.10, 17.2.7. |
-| 17.6.11 | Avoid eval / dynamic execution                        | yes        | Add an eval/dynamic exec on input, one commit. Data-flow + security.                |
-| 17.6.12 | Monkey patching                                       | yes        | Monkey-patch a library in production code, one commit.                              |
-| 17.6.13 | Duck typing discipline                                | partial    | Plantable as an undocumented expected-interface reliance; reads in context.         |
-| 17.6.14 | Lint as build failure                                 | no         | CI/config policy, not a snippet.                                                    |
-| 17.6.15 | Test coverage non-optional                            | partial    | Absence-of-tests; meta over the diff (items 2/8).                                   |
-| 17.6.16 | Pin & validate external contracts                     | partial    | Plantable as an unvalidated external contract, ≈ 17.6.2/18.6.4; partly config.      |
+| ID      | Item                                                    | injectable | note                                                                                |
+| ------- | ------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------- |
+| 17.6.1  | Use gradual typing                                      | partial    | Add untyped/any code in a typed project, one commit; needs typed host.              |
+| 17.6.2  | Runtime schema validation                               | yes        | Consume external data without validation in one commit. ≈ 18.6.4. Data-flow.        |
+| 17.6.3  | Type narrowing                                          | yes        | Operate on an uncertain type without a runtime check, one commit.                   |
+| 17.6.4  | Strict equality (JS)                                    | yes        | §0 exemplar. Use ==/!= in one commit. JS-footgun anchor.                            |
+| 17.6.5  | Mutable default arguments (Python)                      | yes        | Add def f(x=[]) in one commit. JS-footgun analogue (Py).                            |
+| 17.6.6  | this context loss (JS)                                  | yes        | §0 exemplar. Pass an unbound method losing this, one commit. JS-footgun anchor.     |
+| 17.6.7  | var hoisting (JS)                                       | yes        | Use var with a hoisting bug in one commit.                                          |
+| 17.6.8  | Prototype pollution (JS)                                | yes        | Merge untrusted input into a prototype, one commit. Data-flow + security.           |
+| 17.6.9  | Global scope pollution (JS)                             | yes        | Add a non-strict global leak in one commit.                                         |
+| 17.6.10 | Explicit over implicit (no request context in models)   | yes        | Have a model/service call auth()/session() directly, one commit. ≈ 16.7.10, 17.2.7. |
+| 17.6.11 | Avoid eval / dynamic execution                          | yes        | Add an eval/dynamic exec on input, one commit. Data-flow + security.                |
+| 17.6.12 | Monkey patching                                         | yes        | Monkey-patch a library in production code, one commit.                              |
+| 17.6.13 | Duck typing discipline                                  | partial    | Plantable as an undocumented expected-interface reliance; reads in context.         |
+| 17.6.14 | Lint as build failure                                   | no         | CI/config policy, not a snippet.                                                    |
+| 17.6.15 | Test coverage non-optional                              | partial    | Absence-of-tests; meta over the diff (items 2/8).                                   |
+| 17.6.16 | Pin & validate external contracts                       | partial    | Plantable as an unvalidated external contract, ≈ 17.6.2/18.6.4; partly config.      |
+| 17.6.17 | Implicit numeric/narrowing coercion (C/C++/Go/Java/PHP) | no         | Cross-language footgun reference; not plantable in the TS corpus.                   |
+| 17.6.18 | Nil receiver / interface-nil comparison (Go)            | no         | Cross-language footgun reference; Go-only, not plantable in the TS corpus.          |
+| 17.6.19 | Unsafe nil-chain / safe-navigation misuse (Ruby)        | no         | Cross-language footgun reference; Ruby-only, not plantable in the TS corpus.        |
 
 ## §18 Architectural Aspects
 
@@ -313,7 +316,7 @@ Counts over all leaf IDs enumerated above:
 
 - **yes: 63**
 - **partial: 50**
-- **no: 34**
+- **no: 37**
 
 The `yes` pool is comfortably large enough to build the six comparable Phase-1 groups (~4–5 items each)
 spanning the four symptom families named in [`phase-1-design.md`](docs/phase-1-design.md) §1:

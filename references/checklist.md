@@ -228,6 +228,9 @@ If a function has many levels of indentation, that's a code smell. Prefer splitt
 - 17.6.14 Lint as build failure: treat ESLint/Pylint/Flake8 errors as blocking
 - 17.6.15 Test coverage is non-optional in dynamic languages
 - 17.6.16 Pin and validate external contracts: use contract tests or schema validation
+- 17.6.17 Implicit numeric/narrowing coercion (C/C++/Go/Java/PHP): avoid silent lossy conversions; make widening/narrowing explicit
+- 17.6.18 Nil receiver / interface-nil comparison (Go): a typed nil stored in an interface is not `== nil`; a nil pointer receiver still dispatches
+- 17.6.19 Unsafe nil-chain / safe-navigation misuse (Ruby): chaining a regular method after `&.` re-introduces the nil crash the `&.` was meant to prevent
 
 ## 18. Architectural Aspects
 

@@ -66,6 +66,26 @@ else
     echo -e "${GREEN}✅ No Markdown files to format${NC}"
 fi
 
+# 1b. issue-detection-tool-capabilities-matrix report is in sync with its data
+#     source. The doc's tables + notes are generated from
+#     data/issue-detection-tool-capabilities-matrix.json by
+#     scripts/issue_detection_tool_capabilities_matrix_report.py; regenerate so any
+#     data edit lands in this commit, then re-stage the doc.
+echo -e "${YELLOW}Regenerating issue-detection-tool-capabilities-matrix report…${NC}"
+if [ -f data/issue-detection-tool-capabilities-matrix.json ] && [ -f docs/issue-detection-tool-capabilities-matrix.md ]; then
+    if "$PY" "$SCRIPT_DIR/issue_detection_tool_capabilities_matrix_report.py" >/dev/null; then
+        if git rev-parse --git-dir >/dev/null 2>&1; then
+            git add -- docs/issue-detection-tool-capabilities-matrix.md 2>/dev/null || true
+        fi
+        echo -e "${GREEN}✅ issue-detection-tool-capabilities-matrix report regenerated${NC}"
+    else
+        echo -e "${RED}❌ issue_detection_tool_capabilities_matrix_report.py errored${NC}"
+        failed+=("idtcm-report")
+    fi
+else
+    echo -e "${GREEN}✅ No matrix data/doc to regenerate (skipped)${NC}"
+fi
+
 # 2. bank.jsonl validity (one JSON object per non-empty line).
 echo -e "${YELLOW}Validating corpus/bank.jsonl…${NC}"
 if [ -f corpus/bank.jsonl ]; then

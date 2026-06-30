@@ -3,9 +3,12 @@
 
 Finds each contiguous run of table lines (a header row, a delimiter row of
 `---`/`:--:` cells, then body rows), recomputes per-column widths, and rewrites
-the run with padded cells. Alignment markers in the delimiter row are honored:
+the run with padded cells.
 
-    |:---|   left      |:--:|  center     |---:|  right     |---|  default (left)
+Alignment markers (`:` in the delimiter row, e.g. `:--:` / `--:`) are accepted
+when *reading* an existing table, but are NEVER written back: the formatter
+always emits a plain `---` delimiter for every column and left/default padding,
+so no alignment colons appear in the output.
 
 Display-width aware: emoji such as the ones used in this repo (status icons)
 render roughly two terminal cells wide, so they are counted as width 2 when
@@ -32,12 +35,15 @@ import sys
 import unicodedata
 
 # Code-point ranges that render as two cells in a monospace/terminal grid.
-# (Covers the emoji + CJK/full-width blocks; enough for our docs.)
+#
+# NOTE: the BMP "misc symbols & dingbats" block (0x2600-0x27BF, which contains
+# the status icons ✅ U+2705 and ⚠ U+26A0) is deliberately NOT listed here.
+# Editors/markdown renderers display those as a SINGLE narrow cell (East-Asian
+# width "N"), so forcing them to 2 over-pads the warning/check rows and skews
+# the columns. We let them fall through to width 1. Only true full-width CJK and
+# the astral emoji planes are treated as width 2.
 _WIDE_RANGES = (
     (0x1100, 0x115F),   # Hangul Jamo
-    (0x2329, 0x232A),
-    (0x2600, 0x27BF),   # misc symbols + dingbats (✅ ⚠ live near here)
-    (0x2B00, 0x2BFF),
     (0x2E80, 0x303E),   # CJK radicals .. Kangxi
     (0x3041, 0x33FF),
     (0x3400, 0x4DBF),
@@ -45,31 +51,62 @@ _WIDE_RANGES = (
     (0xA000, 0xA4CF),
     (0xAC00, 0xD7A3),   # Hangul syllables
     (0xF900, 0xFAFF),
-    (0xFE10, 0xFE19),
-    (0xFE30, 0xFE6F),
     (0xFF00, 0xFF60),   # full-width forms
     (0xFFE0, 0xFFE6),
-    (0x1F000, 0x1FAFF),  # emoji planes
+    (0x1F300, 0x1FAFF),  # astral emoji planes (true wide pictographs)
     (0x20000, 0x3FFFD),
 )
 
 
+# Status icons used in our docs. We switched away from emoji (✅ U+2705 / ⚠️
+# U+26A0+FE0F) because their width is inconsistent across renderers (✅ is
+# East-Asian "W"=2, ⚠ is "N"=1, and the VS-16 selector is invisible) — that
+# mismatch drifts the columns. The current markers are single-cell glyphs:
+#   ✓ U+2713 = complete,  ∙ U+2219 = partial  (both East-Asian width "N").
+# We still pin every status glyph (old + new) to width 1 so any cell holding a
+# marker lines up with any other, regardless of how a given font classifies it.
+_ICON_WIDTH = {
+    "\u2713": 1,  # ✓ complete (current)
+    "\u2219": 1,  # ∙ partial  (current)
+    "\u2705": 1,  # ✅ legacy
+    "\u26A0": 1,  # ⚠ legacy
+    "\u274C": 1,  # ❌
+    "\u2714": 1,  # ✔
+    "\u2716": 1,  # ✖
+    "\u25E6": 1,  # ◦ white bullet
+    "\u2022": 1,  # • bullet
+    "\u00B7": 1,  # · middot
+}
+
+
 def _char_width(ch: str) -> int:
     cp = ord(ch)
+    if ch in _ICON_WIDTH:
+        return _ICON_WIDTH[ch]
     if unicodedata.combining(ch):
         return 0
     if ch == "\uFE0F":  # variation selector-16 (emoji presentation) — zero-width
         return 0
-    if unicodedata.east_asian_width(ch) in ("W", "F"):
-        return 2
     for lo, hi in _WIDE_RANGES:
         if lo <= cp <= hi:
             return 2
+    if unicodedata.east_asian_width(ch) in ("W", "F"):
+        return 2
     return 1
 
 
 def display_width(s: str) -> int:
     return sum(_char_width(c) for c in s)
+
+
+def normalize_icons(s: str) -> str:
+    """Drop the invisible VS-16 (U+FE0F) emoji-presentation selector.
+
+    `⚠️` is `⚠` + U+FE0F; the selector is zero-width but its presence makes the
+    bytes differ from a bare `✅`. Removing it keeps cell contents consistent so
+    columns line up regardless of how a renderer treats the selector.
+    """
+    return s.replace("\uFE0F", "")
 
 
 # Inline emphasis/code markers that a concealing editor hides. Order matters:
@@ -171,9 +208,9 @@ def format_table(block: list[str], strip_markup: bool = True) -> list[str]:
     removed from every header and body cell before alignment so the result lines
     up in editors that conceal those markers.
     """
-    header = _split_row(block[0])
+    header = [normalize_icons(c) for c in _split_row(block[0])]
     delim = _split_row(block[1])
-    body = [_split_row(r) for r in block[2:]]
+    body = [[normalize_icons(c) for c in _split_row(r)] for r in block[2:]]
     if strip_markup:
         header = [strip_inline_markup(c) for c in header]
         body = [[strip_inline_markup(c) for c in r] for r in body]
@@ -185,34 +222,21 @@ def format_table(block: list[str], strip_markup: bool = True) -> list[str]:
     header = norm(header)
     delim = norm(delim) if any(delim) else [":-:"] * ncols
     body = [norm(r) for r in body]
-    aligns = [_alignment(delim[i]) if i < len(delim) else "left" for i in range(ncols)]
 
     widths = []
     for i in range(ncols):
         col_cells = [header[i]] + [r[i] for r in body]
         widths.append(max(3, max(display_width(c) for c in col_cells)))
 
+    # We deliberately do NOT emit alignment markers (`:`) in the delimiter row.
+    # Every column is rendered with a plain `---` delimiter and left/default
+    # padding, regardless of any `:--:`/`--:` markers in the source.
     def render(cells: list[str]) -> str:
-        out = []
-        for i in range(ncols):
-            a = aligns[i]
-            a = "left" if a == "left-explicit" else a
-            out.append(_pad(cells[i], widths[i], a))
+        out = [_pad(cells[i], widths[i], "left") for i in range(ncols)]
         return "| " + " | ".join(out) + " |"
 
     def render_delim() -> str:
-        out = []
-        for i in range(ncols):
-            w = widths[i]
-            a = aligns[i]
-            if a == "center":
-                out.append(":" + "-" * (w - 2) + ":")
-            elif a == "right":
-                out.append("-" * (w - 1) + ":")
-            elif a == "left-explicit":
-                out.append(":" + "-" * (w - 1))
-            else:
-                out.append("-" * w)
+        out = ["-" * widths[i] for i in range(ncols)]
         return "| " + " | ".join(out) + " |"
 
     return [render(header), render_delim()] + [render(r) for r in body]
