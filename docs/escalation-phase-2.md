@@ -9,6 +9,12 @@ The goal of Phase 2: from the injectable item universe, **discover groupings tha
 (and downstream recall) at acceptable cost** — without exhaustive pairwise testing, and capturing 3+-way
 reinforcement, treating the model as a black box.
 
+> **Consumed as a validation engine.** [`prompt-grouping-method.md`](prompt-grouping-method.md) — the
+> pipeline that turns the static gap into shippable grouped agent prompts — **scopes the item pool to the
+> static gap** (matrix `none`/`partial` items) and feeds its similarity-seeded candidate groups into the
+> search below as the starting partition. The mechanics here are unchanged; that doc only adds the pool
+> scoping and the downstream prompt-synthesis step.
+
 ## Why not exhaustive pairwise
 
 ~130 items → ~8,400 pairs; the injectable subset is smaller but still large. Worse, pairwise lift cannot see

@@ -37,3 +37,18 @@ referenced docs for the governing spec.
   matrix (N≥3, temp 0, frozen preamble), and the LLM-judge semantic scorer that computes
   reinforcement lift.
   → `docs/methodology.md`, `docs/phase-1-design.md` §3
+
+- [x] **5. Tool-capabilities matrix** — assess which checklist items off-the-shelf linters /
+  static analyzers already catch, so grouping effort focuses on the **static gap** (items needing
+  semantic/LLM judgement). 176 items × 24 tools, fully researched.
+  → `docs/issue-detection-tool-capabilities-matrix.md`, `data/issue-detection-tool-capabilities-matrix.json`
+
+- [x] **6. Prompt-grouping method** — specify the process that turns the static-gap item pool into
+  grouped **agent prompts** (pool → similarity-seeded candidate groups → Phase-2 lift validation →
+  prompt synthesis). Method only; no groups or prompts produced yet.
+  → `docs/prompt-grouping-method.md`
+
+- [ ] **7. Run the prompt-grouping method** (gated on Phase 1 pass + Phase 2) — derive the static-gap
+  pool, seed + validate candidate groups via the lift search, and synthesize one agent prompt per
+  validated group for the `code-review` skill.
+  → `docs/prompt-grouping-method.md`

@@ -49,6 +49,14 @@ Only once Phase 1 confirms the effect and tells us the noise level and per-run c
 search method (greedy forward-selection baseline → screening design / Bayesian optimization / sparse-graph
 community detection). See [`docs/escalation-phase-2.md`](docs/escalation-phase-2.md).
 
+**Payoff — grouped agent prompts.**
+The point of discovering good groups is to ship them: turn each validated group into one **agent prompt** for
+the `code-review` skill. The prompt-production pipeline scopes the item pool to the **static gap** — the
+checklist items that off-the-shelf linters *don't* catch (see the
+[tool-capabilities matrix](docs/issue-detection-tool-capabilities-matrix.md)) — seeds candidate groups by
+symptom similarity, validates them with the Phase-2 lift search, and synthesizes a prompt per surviving
+group. See [`docs/prompt-grouping-method.md`](docs/prompt-grouping-method.md).
+
 ## How an experiment case is built (the realistic part)
 
 Rather than reviewing toy snippets, cases are built from a **real codebase**:
@@ -66,14 +74,18 @@ See [`docs/corpus-spec.md`](docs/corpus-spec.md) and [`docs/methodology.md`](doc
 ## Status
 
 **Phase 1 designed, not yet run.** This repository currently contains the design and methodology only. The
-harness, corpus, and experiment execution are the next, separately-approved step.
+harness, corpus, and experiment execution are the next, separately-approved step. The
+[tool-capabilities matrix](docs/issue-detection-tool-capabilities-matrix.md) (which checklist items static
+tools already catch) is complete, and the [prompt-grouping method](docs/prompt-grouping-method.md) that
+consumes it is specified; *running* that method is gated on Phase 1 + Phase 2.
 
 ## Docs
 
-| Doc                                                      | Contents                                                                                              |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| [docs/methodology.md](docs/methodology.md)               | Locked decisions: lift metric, fixed-case confound control, corpus design, density, variance, scoring |
-| [docs/phase-1-design.md](docs/phase-1-design.md)         | The 3-cohesive/3-incoherent contrast, run matrix, go/no-go criterion                                  |
-| [docs/corpus-spec.md](docs/corpus-spec.md)               | Commit-bank trailer grammar + the cherry-pick case-builder contract                                   |
-| [docs/references.md](docs/references.md)                 | Prior art and reusable patterns (memory + qualops evals)                                              |
-| [docs/escalation-phase-2.md](docs/escalation-phase-2.md) | Candidate rigorous search methods + the decision rule                                                 |
+| Doc                                                              | Contents                                                                                              |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [docs/methodology.md](docs/methodology.md)                       | Locked decisions: lift metric, fixed-case confound control, corpus design, density, variance, scoring |
+| [docs/phase-1-design.md](docs/phase-1-design.md)                 | The 3-cohesive/3-incoherent contrast, run matrix, go/no-go criterion                                  |
+| [docs/corpus-spec.md](docs/corpus-spec.md)                       | Commit-bank trailer grammar + the cherry-pick case-builder contract                                   |
+| [docs/references.md](docs/references.md)                         | Prior art and reusable patterns (memory + qualops evals)                                              |
+| [docs/escalation-phase-2.md](docs/escalation-phase-2.md)         | Candidate rigorous search methods + the decision rule                                                 |
+| [docs/prompt-grouping-method.md](docs/prompt-grouping-method.md) | Method: static-gap pool → similarity-seeded groups → lift-validated → grouped agent prompts           |
