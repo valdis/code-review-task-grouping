@@ -41,9 +41,23 @@ referenced docs for the governing spec.
     (CRB survey); computed the per-case padding budget from `bank.jsonl` and found the padding shortfall
     above.
 
-- [ ] **4. Build the harness** — case-builder (cherry-pick + `git diff`), the solo-vs-in-group run
+- [x] **4. Build the harness** — case-builder (cherry-pick + `git diff`), the solo-vs-in-group run
   matrix (N≥3, temp 0, frozen preamble), and the LLM-judge semantic scorer that computes
   reinforcement lift.
+    - [x] `scripts/build_case.py` — composes a fixed case (issue set-cover + seeded padding →
+      cherry-pick → `diff.patch` + `manifest.json` with per-commit line ranges). c1-data-flow built.
+    - [x] `scripts/run_matrix.py` — assembles the frozen prompt (per-case file list + varying
+      checklist subset + fixed diff) and runs `claude -p` N≥3 per condition (Solo `{i}` + In-group `G`),
+      writing raw runs to `<case>/results/runs/`. Verified via `--dry-run`/`--print-prompt`.
+    - [x] `scripts/score_matrix.py` — pairwise LLM-judge semantic matcher (multi-tag golden, decoy-FP
+      flagging) → per-item detection frequency → per-item/per-group reinforcement lift → `summary.json`.
+      Lift math unit-tested with a stub judge.
+    - [ ] **Actual runs pending a plain terminal** — the `claude -p` sub-invocations get killed inside a
+      Claude Code session (CLAUDECODE=1); run_matrix + score_matrix must be executed standalone to
+      produce `results/`. Also: grow daily-webhook padding to hit the 60–100 density band before the
+      scored run (case currently 31 lines/issue).
+    - Note: the CLI has no `--temperature` flag, so "temp 0" is nominal (CLI default); N≥3 frequencies
+      absorb the run-to-run noise as the methodology intends.
   → `docs/methodology.md`, `docs/phase-1-design.md` §3
 
 - [x] **5. Tool-capabilities matrix** — assess which checklist items off-the-shelf linters /
