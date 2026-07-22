@@ -42,3 +42,26 @@ headers.
 pooled **82.0**. Range 19–190 (real PRs vary widely — case 8 is dense, case 10 sparse).
 
 > Status: **computed.** `lines_per_issue: 80` confirmed against the empirical distribution.
+
+## Per-case padding budget (bank vs target)
+
+The target sizes each **composed case**, not each area. A case tests one `(C,D)` pair, so it plants only
+that pair's `C ∪ D` issues, then pads with `Kind: decoy`/`clean` commits **in the same `Area`** until
+`total_added ≈ issues × 80` (±25% → 60–100 lines/issue). Computed from
+[`bank.jsonl`](bank.jsonl) for the currently-planted **daily-webhook** area:
+
+| Composed case        | Issues | Issue lines | Pad available (decoy+clean) | Max total | Lines/issue | In band? |
+| -------------------- | ------ | ----------- | --------------------------- | --------- | ----------- | -------- |
+| C1 (F1 only)         | 3      | 27          | 66                          | 93        | 31.0        | no       |
+| C1 + co-located F4/D | 6      | 97          | 66                          | 163       | 27.2        | no       |
+
+**Finding — padding shortfall.** The daily-webhook area has 3 decoys (39 lines) + 3 clean (27 lines) =
+**66 pad lines**, but hitting 80 lines/issue for the 3-issue C1 case needs a total of ~240 (≈213 pad
+lines), and ~480 for the 6-issue case. Even consuming all current padding tops out at ~31 lines/issue.
+
+**Action for case composition (before running cases):** grow daily-webhook `Kind: clean`/`decoy` padding
+by ≈**150–400 added lines** (several more realistic filler commits) so a case can reach the 60–100 band;
+alternatively, lower `lines_per_issue` for Phase-1 cases and record the basis. The other planted areas
+(`packages/lib/server`, `routing-forms`, `emails/src`) currently have **no** padding and will each need a
+similar budget before their C2/C3 cases compose at density. This is a **case-builder input**, tracked in
+`TODO.md` #3 → #4; it does not change the calibrated `lines_per_issue: 80` knob itself.

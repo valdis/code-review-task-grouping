@@ -184,5 +184,7 @@ compose-tested to cherry-pick cleanly (no conflicts) and mirrored to [`corpus/ba
   16.8.5, 17.1.12 (+16.4.1), 16.4.6 (+1).
 - **F4 (area `daily-webhook`)** — 3 commits: 17.6.6, 17.6.8, 17.6.10.
 
-Remaining for TODO #3: C1 decoys / near-misses + clean padding, and running density calibration to size
-the padding for case composition.
+C1 also carries 3 `decoy/*` near-misses (Near-Miss-Of 17.4.4a, 16.7.7, 18.6.4) and 3 `clean/*` padding
+commits for precision-testing. Density calibration (`corpus/density-calibration.md`) confirmed
+`lines_per_issue: 80` and computed the per-case padding budget: the areas still need more clean/decoy
+padding to reach that density when cases are composed (tracked in TODO #3 → #4).

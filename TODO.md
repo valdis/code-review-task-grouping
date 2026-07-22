@@ -31,9 +31,15 @@ referenced docs for the governing spec.
     - [x] **C3 bloat (areas `packages/app-store/routing-forms`, `packages/emails/src`)**: 4 issue commits:
       16.7.6 (+10), 16.8.5, 17.1.12 (+16.4.1), 16.4.6 (+1).
     - [x] **D-group JS-footgun items (area `daily-webhook`)**: 3 issue commits: 17.6.6, 17.6.8, 17.6.10.
-    - [ ] C1 decoys / near-misses (valid `||` fallback, logging catch, validated branch) + clean padding.
-  - [ ] Run density calibration from cal.com CRB cases (`corpus/density-calibration.md`) — sizes the
-    clean/decoy padding for case composition.
+    - [x] **C1 decoys / near-misses (area `daily-webhook`)**: 3 `decoy/*` commits (Near-Miss-Of
+      17.4.4a, 16.7.7, 18.6.4) + 3 `clean/*` padding commits. Compose-tested with the C1 issues.
+    - [ ] **Grow padding to density** (case-builder input, feeds #4): daily-webhook has only 66 pad lines
+      vs ~213 needed for the C1 case at `lines_per_issue: 80`; the C2/C3 areas have **no** padding yet.
+      Add clean/decoy filler per area before composing cases. See `corpus/density-calibration.md`
+      "Per-case padding budget".
+  - [x] Run density calibration (`corpus/density-calibration.md`) — `lines_per_issue: 80` confirmed
+    (CRB survey); computed the per-case padding budget from `bank.jsonl` and found the padding shortfall
+    above.
 
 - [ ] **4. Build the harness** — case-builder (cherry-pick + `git diff`), the solo-vs-in-group run
   matrix (N≥3, temp 0, frozen preamble), and the LLM-judge semantic scorer that computes
