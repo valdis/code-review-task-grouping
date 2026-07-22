@@ -174,7 +174,15 @@ valid tags per planted issue.
 
 ## Planting status
 
-- **C1 (area `daily-webhook`)** — 3 issue commits already planted and compose-tested, covering the whole
-  C1 group (`corpus/bank.jsonl`): 18.6.4 (+17.6.2), 17.4.4a, 17.6.2 (+17.6.3). The former 16.7.7 plant
-  was dropped (linter-solved, no longer in the group set).
-- **C2, C3, F4** — not yet planted (TODO #3).
+All 15 items are planted as `Kind: issue` commits on independent `issue/*` branches off `main`, each
+compose-tested to cherry-pick cleanly (no conflicts) and mirrored to [`corpus/bank.jsonl`](corpus/bank.jsonl).
+
+- **C1 (area `daily-webhook`)** — 3 commits: 18.6.4 (+17.6.2), 17.4.4a, 17.6.2 (+17.6.3). The former
+  16.7.7 plant was dropped (linter-solved, no longer in the group set).
+- **C2 (area `packages/lib/server`)** — 4 commits: 17.4.1, 17.4.2, 17.4.7, 17.4.5.
+- **C3 (areas `packages/app-store/routing-forms`, `packages/emails/src`)** — 4 commits: 16.7.6 (+10),
+  16.8.5, 17.1.12 (+16.4.1), 16.4.6 (+1).
+- **F4 (area `daily-webhook`)** — 3 commits: 17.6.6, 17.6.8, 17.6.10.
+
+Remaining for TODO #3: C1 decoys / near-misses + clean padding, and running density calibration to size
+the padding for case composition.

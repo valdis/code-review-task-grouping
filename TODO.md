@@ -24,12 +24,14 @@ referenced docs for the governing spec.
     commit (source clone had pack corruption; seeded via `git archive`, host files verified identical).
   - [~] Build the labeled commit bank — plant the 15 items from `groups.md` as `Kind: issue` commits
     + decoys/clean padding; mirror to `bank.jsonl`.
-    - [x] **C1 data-flow (area `daily-webhook`)**: 4 issue commits on `issue/*` branches, all
+    - [x] **C1 data-flow (area `daily-webhook`)**: 3 issue commits on `issue/*` branches, all
       independently cherry-pickable (compose-tested, no conflicts), recorded in `bank.jsonl`:
-      18.6.4 (+17.6.2), 16.7.7, 17.4.4a, 17.6.2 (+17.6.3).
+      18.6.4 (+17.6.2), 17.4.4a, 17.6.2 (+17.6.3). (Former 16.7.7 dropped — linter-solved.)
+    - [x] **C2 structural (area `packages/lib/server`)**: 4 issue commits: 17.4.1, 17.4.2, 17.4.7, 17.4.5.
+    - [x] **C3 bloat (areas `packages/app-store/routing-forms`, `packages/emails/src`)**: 4 issue commits:
+      16.7.6 (+10), 16.8.5, 17.1.12 (+16.4.1), 16.4.6 (+1).
+    - [x] **D-group JS-footgun items (area `daily-webhook`)**: 3 issue commits: 17.6.6, 17.6.8, 17.6.10.
     - [ ] C1 decoys / near-misses (valid `||` fallback, logging catch, validated branch) + clean padding.
-    - [ ] C2 structural + C3 bloat issue commits (areas `packages/lib/server`, app-store/emails).
-    - [ ] D-group JS-footgun items (17.6.4, 17.6.6, 17.6.7).
   - [ ] Run density calibration from cal.com CRB cases (`corpus/density-calibration.md`) — sizes the
     clean/decoy padding for case composition.
 
