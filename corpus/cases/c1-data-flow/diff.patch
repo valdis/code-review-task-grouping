@@ -1,0 +1,167 @@
+diff --git a/apps/web/lib/daily-webhook/eventTypes.ts b/apps/web/lib/daily-webhook/eventTypes.ts
+new file mode 100644
+index 0000000..37e564b
+--- /dev/null
++++ b/apps/web/lib/daily-webhook/eventTypes.ts
+@@ -0,0 +1,12 @@
++export const DAILY_WEBHOOK_EVENT_TYPES = {
++  RECORDING_READY: "recording.ready-to-download",
++  MEETING_ENDED: "meeting.ended",
++  BATCH_PROCESSOR_JOB_FINISHED: "batch-processor.job-finished",
++} as const;
++
++export type DailyWebhookEventType =
++  (typeof DAILY_WEBHOOK_EVENT_TYPES)[keyof typeof DAILY_WEBHOOK_EVENT_TYPES];
++
++export const isKnownDailyWebhookEvent = (type: string): type is DailyWebhookEventType => {
++  return Object.values(DAILY_WEBHOOK_EVENT_TYPES).includes(type as DailyWebhookEventType);
++};
+diff --git a/apps/web/lib/daily-webhook/getCalendarEvent.ts b/apps/web/lib/daily-webhook/getCalendarEvent.ts
+index e3f76b0..031607b 100644
+--- a/apps/web/lib/daily-webhook/getCalendarEvent.ts
++++ b/apps/web/lib/daily-webhook/getCalendarEvent.ts
+@@ -3,6 +3,14 @@ import type { CalendarEvent } from "@calcom/types/Calendar";
+ 
+ import type { getBookingResponse } from "./getBooking";
+ 
++const DEFAULT_EVENT_TITLE = "Cal Video Recording";
++
++// Falls back to a generic recording title when the booking has no title.
++// The default is a sensible label for the same concept, not an unrelated value.
++export const resolveEventTitle = (booking: getBookingResponse) => {
++  return booking.title?.trim() ? booking.title : DEFAULT_EVENT_TITLE;
++};
++
+ export const getCalendarEvent = async (booking: getBookingResponse) => {
+   const t = await getTranslation(booking?.user?.locale ?? "en", "common");
+ 
+@@ -27,7 +35,7 @@ export const getCalendarEvent = async (booking: getBookingResponse) => {
+     startTime: booking.startTime.toISOString(),
+     endTime: booking.endTime.toISOString(),
+     organizer: {
+-      email: booking?.userPrimaryEmail || booking.user?.email || "Email-less",
++      email: booking?.userPrimaryEmail || booking.user?.email || attendeesList[0]?.email || "Email-less",
+       name: booking.user?.name || "Nameless",
+       timeZone: booking.user?.timeZone || "Europe/London",
+       language: { translate: t, locale: booking?.user?.locale ?? "en" },
+diff --git a/apps/web/lib/daily-webhook/recordingStatus.ts b/apps/web/lib/daily-webhook/recordingStatus.ts
+new file mode 100644
+index 0000000..dbc9198
+--- /dev/null
++++ b/apps/web/lib/daily-webhook/recordingStatus.ts
+@@ -0,0 +1,6 @@
++export const RECORDING_FINISHED_STATUS = "finished";
++
++// A recording is ready to process only once its status is finished.
++export const isRecordingFinished = (status: string): boolean => {
++  return status === RECORDING_FINISHED_STATUS;
++};
+diff --git a/apps/web/lib/daily-webhook/roomName.ts b/apps/web/lib/daily-webhook/roomName.ts
+new file mode 100644
+index 0000000..15217f9
+--- /dev/null
++++ b/apps/web/lib/daily-webhook/roomName.ts
+@@ -0,0 +1,9 @@
++const CAL_VIDEO_ROOM_PREFIX = "cal-video-";
++
++// Strips the internal prefix from a Cal Video room name for display.
++export const toDisplayRoomName = (roomName: string): string => {
++  if (roomName.startsWith(CAL_VIDEO_ROOM_PREFIX)) {
++    return roomName.slice(CAL_VIDEO_ROOM_PREFIX.length);
++  }
++  return roomName;
++};
+diff --git a/apps/web/lib/daily-webhook/schema.ts b/apps/web/lib/daily-webhook/schema.ts
+index ef4dae4..cf91199 100644
+--- a/apps/web/lib/daily-webhook/schema.ts
++++ b/apps/web/lib/daily-webhook/schema.ts
+@@ -61,3 +61,22 @@ export const downloadLinkSchema = z.object({
+ export const testRequestSchema = z.object({
+   test: z.enum(["test"]),
+ });
++
++export const heartbeatSchema = commonSchema.extend({
++  payload: z.object({
++    room_name: z.string(),
++    active_participants: z.number().int().nonnegative(),
++  }),
++});
++
++export type THeartbeat = z.infer<typeof heartbeatSchema>;
++
++// Reads room + participant count from a raw heartbeat body. The body is
++// validated through the schema before any field is used.
++export const parseHeartbeat = (body: unknown) => {
++  const parsed = heartbeatSchema.parse(body);
++  return {
++    roomName: parsed.payload.room_name,
++    activeParticipants: parsed.payload.active_participants,
++  };
++};
+diff --git a/apps/web/lib/daily-webhook/triggerWebhooks.ts b/apps/web/lib/daily-webhook/triggerWebhooks.ts
+index 562a8b7..99e88a3 100644
+--- a/apps/web/lib/daily-webhook/triggerWebhooks.ts
++++ b/apps/web/lib/daily-webhook/triggerWebhooks.ts
+@@ -16,6 +16,18 @@ type Booking = {
+   teamId?: number | null;
+ };
+ 
++// Best-effort webhook count for logging. A failure here must not block the
++// recording flow, so we log the error and fall back to an unknown count.
++const countWebhooksForLogging = async (eventTrigger: WebhookTriggerEvents, booking: Booking) => {
++  try {
++    const webhooks = await getWebhooksByEventTrigger(eventTrigger, booking);
++    return webhooks.length;
++  } catch (err) {
++    log.warn("Could not pre-count webhooks for logging", safeStringify(err));
++    return null;
++  }
++};
++
+ const getWebhooksByEventTrigger = async (eventTrigger: WebhookTriggerEvents, booking: Booking) => {
+   const isTeamBooking = booking.teamId;
+   const isBookingForManagedEventtype = booking.teamId && booking.eventTypeParentId;
+diff --git a/apps/web/pages/api/recorded-daily-video.ts b/apps/web/pages/api/recorded-daily-video.ts
+index ceab1c5..812b908 100644
+--- a/apps/web/pages/api/recorded-daily-video.ts
++++ b/apps/web/pages/api/recorded-daily-video.ts
+@@ -51,6 +51,11 @@ const getDownloadLinkOfCalVideo = async (recordingId: string) => {
+   return downloadLink;
+ };
+ 
++const getRecordingExpiry = async (recordingId: string) => {
++  const response = await getDownloadLinkOfCalVideoByRecordingId(recordingId);
++  return (response as { expiry_ts: number }).expiry_ts;
++};
++
+ async function handler(req: NextApiRequest, res: NextApiResponse) {
+   if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_EMAIL) {
+     return res.status(405).json({ message: "No SendGrid API key or email" });
+@@ -209,6 +214,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
+         },
+       });
+ 
++      return res.status(200).json({ message: "Success" });
++    } else if (req.body?.type === "recording.error") {
++      const { room_name, error_message } = req.body.payload;
++
++      const bookingReference = await getBookingReference(room_name);
++      const booking = await getBooking(bookingReference.bookingId as number);
++
++      await prisma.booking.update({
++        where: {
++          uid: booking.uid,
++        },
++        data: {
++          isRecorded: false,
++        },
++      });
++
++      log.error(
++        "Daily reported a recording error",
++        safeStringify({ bookingUid: booking.uid, error_message })
++      );
++
+       return res.status(200).json({ message: "Success" });
+     } else {
+       log.error("Invalid type in /recorded-daily-video", req.body);

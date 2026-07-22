@@ -1,0 +1,146 @@
+{
+  "case_id": "c1-data-flow",
+  "base_sha": "8cddc04bb22d48797b2603180399f78f1ffbb856",
+  "upstream_base_sha": "92f44dcea7ff19e9123a30c63c167a2938df5a55",
+  "area": "daily-webhook",
+  "planted": [
+    {
+      "commit": "2115098c7a1310ef108e0a606912e30974085eb2",
+      "items": [
+        "17.6.2",
+        "17.6.3"
+      ],
+      "files": [
+        "apps/web/pages/api/recorded-daily-video.ts"
+      ],
+      "lines": [
+        [
+          54,
+          58
+        ]
+      ],
+      "subject": "Add helper to read Cal Video recording expiry"
+    },
+    {
+      "commit": "3b023a6ef21b2a984e634d502c3821a99a4c6487",
+      "items": [
+        "17.4.4a"
+      ],
+      "files": [
+        "apps/web/lib/daily-webhook/getCalendarEvent.ts"
+      ],
+      "lines": [
+        [
+          38,
+          38
+        ]
+      ],
+      "subject": "Fall back organizer email when user record has none"
+    },
+    {
+      "commit": "a0b4992e3421ddb9d82fee7327c242146102df60",
+      "items": [
+        "18.6.4",
+        "17.6.2"
+      ],
+      "files": [
+        "apps/web/pages/api/recorded-daily-video.ts"
+      ],
+      "lines": [
+        [
+          217,
+          237
+        ]
+      ],
+      "subject": "Handle recording.error daily webhook event"
+    }
+  ],
+  "decoys": [
+    {
+      "commit": "5e0b4299931b40c94ea004282862312653e20b41",
+      "near_miss_of": "18.6.4",
+      "files": [
+        "apps/web/lib/daily-webhook/schema.ts"
+      ],
+      "lines": [
+        [
+          64,
+          82
+        ]
+      ]
+    },
+    {
+      "commit": "cd85a067bfe290ca168f3327e14dc941b6b34000",
+      "near_miss_of": "17.4.4a",
+      "files": [
+        "apps/web/lib/daily-webhook/getCalendarEvent.ts"
+      ],
+      "lines": [
+        [
+          6,
+          13
+        ]
+      ]
+    },
+    {
+      "commit": "0484f526181ab031bfbda75272117703c66ce626",
+      "near_miss_of": "16.7.7",
+      "files": [
+        "apps/web/lib/daily-webhook/triggerWebhooks.ts"
+      ],
+      "lines": [
+        [
+          19,
+          30
+        ]
+      ]
+    }
+  ],
+  "clean": [
+    {
+      "commit": "ad51aeb39ea73ef9edb086c09d1bfe904ebb6cd1",
+      "files": [
+        "apps/web/lib/daily-webhook/eventTypes.ts"
+      ]
+    },
+    {
+      "commit": "1c075f0f35ddb8deed40e417129c3f6a326c6ab4",
+      "files": [
+        "apps/web/lib/daily-webhook/recordingStatus.ts"
+      ]
+    },
+    {
+      "commit": "c679d427c845aab5941f405e67fc871b2ac45c9c",
+      "files": [
+        "apps/web/lib/daily-webhook/roomName.ts"
+      ]
+    }
+  ],
+  "stats": {
+    "total_added_lines": 93,
+    "planted_issues": 3,
+    "lines_per_issue": 31.0,
+    "target_lines_per_issue": 80,
+    "target_total_added": 240,
+    "padding_shortfall_lines": 87,
+    "in_density_band": false
+  },
+  "commit_order": [
+    "1c075f0f35ddb8deed40e417129c3f6a326c6ab4",
+    "c679d427c845aab5941f405e67fc871b2ac45c9c",
+    "2115098c7a1310ef108e0a606912e30974085eb2",
+    "5e0b4299931b40c94ea004282862312653e20b41",
+    "ad51aeb39ea73ef9edb086c09d1bfe904ebb6cd1",
+    "3b023a6ef21b2a984e634d502c3821a99a4c6487",
+    "0484f526181ab031bfbda75272117703c66ce626",
+    "a0b4992e3421ddb9d82fee7327c242146102df60",
+    "cd85a067bfe290ca168f3327e14dc941b6b34000"
+  ],
+  "require_items": [
+    "18.6.4",
+    "17.6.2",
+    "17.6.3",
+    "17.4.4a"
+  ],
+  "seed": 12345
+}
